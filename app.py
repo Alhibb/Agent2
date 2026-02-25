@@ -42,6 +42,18 @@ if not agent_key:
                     st.rerun()
                 else:
                     st.sidebar.error("Registration Failed.")
+
+    st.sidebar.markdown("---")
+    with st.sidebar.expander("🔑 Already have an Agent Key?"):
+        manual_key = st.text_input("Enter your `sk_...` key", type="password")
+        manual_id = st.text_input("Agent ID (optional)")
+        if st.button("🔌 Connect Existing Agent"):
+            if manual_key:
+                update_env("SUPERTEAM_AGENT_KEY", manual_key)
+                if manual_id:
+                    update_env("AGENT_ID", manual_id)
+                st.success("Key connected! Reloading...")
+                st.rerun()
 else:
     st.sidebar.success(f"🟢 Agent Online: {agent_name}")
     st.sidebar.info(f"**Agent ID:** {get_env_var('AGENT_ID')}")
