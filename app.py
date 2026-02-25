@@ -10,11 +10,12 @@ from modules.heartbeat_manager import HeartbeatManager
 
 # --- INITIALIZATION ---
 load_env()
-# Initialize Heartbeat
-hb = HeartbeatManager(agent_name=get_env_var("AGENT_NAME", "Alhibb-Architect"))
+# Initialize HB
+app_title = get_env_var("APP_TITLE", "Agent Architect Command Center")
+hb = HeartbeatManager(agent_name=get_env_var("AGENT_NAME", "Agent-1"))
 
 st.set_page_config(
-    page_title="Alhibb Architect Command Center",
+    page_title=app_title,
     page_icon="🤖",
     layout="wide"
 )
@@ -80,7 +81,7 @@ if st.sidebar.button("📡 Broadcast Heartbeat"):
     st.sidebar.success("Heartbeat synced to console!")
 
 # --- MAIN UI ---
-st.title("🏛️ Alhibb Architect Command Center")
+st.title(f"🏛️ {app_title}")
 
 if not agent_key:
     st.info("👈 Please register your agent in the sidebar to start discovery.")
