@@ -6,9 +6,12 @@ from datetime import datetime
 from modules.auth_manager import load_env, get_env_var, register_agent, update_env
 from modules.api_client import SuperteamClient
 from modules.ai_architect import AIArchitect
+from modules.heartbeat_manager import HeartbeatManager
 
 # --- INITIALIZATION ---
 load_env()
+# Initialize Heartbeat
+hb = HeartbeatManager(agent_name=get_env_var("AGENT_NAME", "Alhibb-Architect"))
 
 st.set_page_config(
     page_title="Alhibb Architect Command Center",
@@ -56,6 +59,14 @@ st.sidebar.markdown(f"🔗 [Github]({get_env_var('AGENT_GITHUB')})")
 st.sidebar.markdown(f"𝕏 [Twitter]({get_env_var('AGENT_X')})")
 st.sidebar.markdown(f"📱 Telegram: `{get_env_var('AGENT_TELEGRAM')}`")
 
+# --- HEARTBEAT DISPLAY ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("💓 Agent Heartbeat")
+heartbeat_data = hb.generate_heartbeat()
+st.sidebar.json(heartbeat_data)
+if st.sidebar.button("📡 Broadcast Heartbeat"):
+    st.sidebar.success("Heartbeat synced to console!")
+
 # --- MAIN UI ---
 st.title("🏛️ Alhibb Architect Command Center")
 
@@ -99,8 +110,9 @@ else:
                     with col2:
                         if st.button("🎯 SELECT", key=f"sel_{l.get('id')}"):
                             st.session_state.selected_bounty = l
+                            hb.set_status("ok", last_action=f"Selected bounty: {l.get('title')}", next_action="Generating architectural solution")
                             st.success(f"Selected: {l.get('title')}")
-                            # st.rerun() # Optional: auto-switch to Tab 2
+                            st.rerun() # Optional: auto-switch to Tab 2
         else:
             st.write("Click 'Refresh Listings' to see live bounties.")
 
@@ -136,6 +148,7 @@ else:
                     else:
                         with st.spinner("Submitting to Superteam..."):
                             tg_url = f"http://t.me/{tg_handle.replace('@', '')}" if tg_handle else ""
+                            hb.set_status("ok", last_action=f"Submitting to {listing_id}", next_action="Awaiting API receipt")
                             result, error_msg = client.create_submission(
                                 listing_id=listing_id,
                                 link=gist_link,
@@ -143,6 +156,7 @@ else:
                                 other_info=other_info
                             )
                             if result:
+                                hb.set_status("ok", last_action=f"Successfully submitted to {listing_id}", next_action="Monitoring results")
                                 st.balloons()
                                 st.success("Submission successful!")
                                 # Save receipt
@@ -160,8 +174,9 @@ else:
             with col_ai:
                 st.subheader("🤖 AI Architect Assistant")
                 if ai_architect:
-                    if st.button("✨ Generate Solution with Gemini"):
-                        with st.spinner("Architecting..."):
+                    if st.button("🧠 Generate Solution with Gemini"):
+                        with st.spinner("Gemini is architecting..."):
+                            hb.set_status("ok", last_action=f"Architecting solution for {bounty.get('title')}", next_action="Reviewing solution")
                             # Using title and any description available if bounty has it
                             desc = bounty.get("description", "No description provided.")
                             solution = ai_architect.generate_solution(bounty.get("title"), desc)
