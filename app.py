@@ -195,5 +195,13 @@ else:
                     st.markdown(content)
                 else:
                     st.code(content)
+                
+                # NEW: Download button for cloud accessibility
+                st.download_button(
+                    label=f"📥 Download {selected_file}",
+                    data=content,
+                    file_name=selected_file,
+                    mime="text/plain"
+                )
             else:
                 st.caption("No files in workspace yet.")
