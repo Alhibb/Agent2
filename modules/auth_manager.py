@@ -7,8 +7,20 @@ def load_env():
     load_dotenv()
 
 def get_env_var(key, default=None):
-    """Retrieves an environment variable."""
-    return os.getenv(key, default)
+    """Retrieves an environment variable, checking Streamlit secrets as fallback."""
+    val = os.getenv(key)
+    if val:
+        return val
+    
+    # Fallback for Streamlit Cloud
+    try:
+        import streamlit as st
+        if key in st.secrets:
+            return st.secrets[key]
+    except:
+        pass
+        
+    return default
 
 def update_env(key, value, env_path=".env"):
     """
